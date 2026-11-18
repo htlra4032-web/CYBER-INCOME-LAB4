@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER INCOME LAB</title>
+
+    <style>
+        body {
+            background: #080d18;
+            color: #e8f0ff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        h1 {
+            color: #00e5ff;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #9aabc5;
+        }
+
+        .card {
+            background: #111b2e;
+            border: 1px solid #243b5c;
+            border-radius: 12px;
+            padding: 22px;
+            margin: 20px 0;
+        }
+
+        input {
+            width: 70%;
+            padding: 14px;
+            border-radius: 7px;
+            border: 1px solid #345;
+            background: #080d18;
+            color: white;
+        }
+
+        button {
+            padding: 14px 22px;
+            background: #00bcd4;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .error {
+            color: #ff7777;
+        }
+
+        h2 {
+            color: #00e5ff;
+        }
+
+        /* إحصائيات المنصة */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            background: #080d18;
+            border: 1px solid #243b5c;
+            border-radius: 10px;
+            padding: 18px;
+            text-align: center;
+        }
+
+        .stat-box .label {
+            font-size: 13px;
+            color: #9aabc5;
+        }
+
+        .stat-box .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #00e5ff;
+            margin-top: 8px;
+        }
+
+        .stat-box.safe .value { color: #4caf50; }
+        .stat-box.medium .value { color: #ffb300; }
+        .stat-box.danger .value { color: #ff5252; }
+
+        /* شريط التنقل */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #111b2e;
+            padding: 15px 25px;
+            border-radius: 12px;
+            border: 1px solid #243b5c;
+            margin-bottom: 30px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .navbar a {
+            color: #9aabc5;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            padding: 8px 16px;
+            border-radius: 7px;
+            transition: all 0.3s ease;
+        }
+
+        .navbar a:hover, .navbar a.active {
+            color: #00e5ff;
+            background: #080d18;
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #9aabc5;
+            font-size: 15px;
+        }
+
+        .btn-logout {
+            background: #331b1b;
+            color: #ff5252 !important;
+            border: 1px solid #ff5252;
+            padding: 6px 12px !important;
+        }
+        
+        .btn-logout:hover {
+            background: #ff5252;
+            color: #fff !important;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <!-- شريط التنقل -->
+    <div class="navbar">
+        <div class="nav-links">
+            <a href="/" class="active">Dashboard</a>
+            <a href="/history">Scan History</a>
+        </div>
+        <div class="nav-user">
+            <span>👤 {{ current_user.username }}</span>
+            <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+        </div>
+    </div>
+
+    <h1>CYBER INCOME LAB</h1>
+    <p class="subtitle">Website Security Analysis Platform</p>
+
+    {% if stats %}
+    <div class="card">
+        <h2>Platform Statistics</h2>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="label">Total Scans</div>
+                <div class="value">{{ stats.total_scans }}</div>
+            </div>
+            <div class="stat-box">
+                <div class="label">Average Score</div>
+                <div class="value">{{ stats.average_score }}%</div>
+            </div>
+            <div class="stat-box safe">
+                <div class="label">Safe (80+)</div>
+                <div class="value">{{ stats.safe_count }}</div>
+            </div>
+            <div class="stat-box medium">
+                <div class="label">Medium (50-79)</div>
+                <div class="value">{{ stats.medium_count }}</div>
+            </div>
+            <div class="stat-box danger">
+                <div class="label">Dangerous (&lt;50)</div>
+                <div class="value">{{ stats.dangerous_count }}</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <h2>Website Scanner</h2>
+        <form method="POST">
+            <input type="text" name="url" placeholder="https://example.com" required>
+            <button type="submit">START SCAN</button>
+        </form>
+    </div>
+
+    {% if error %}
+    <div class="card error">
+        <h2>Scan Error</h2>
+        {{ error }}
+    </div>
+    {% endif %}
+
+    {% if results %}
+    <div class="card">
+        <h2>Security Report</h2>
+        <p>Your security analysis report is ready.</p>
+        <a href="/download-report">
+            <button type="button">DOWNLOAD PDF REPORT</button>
+        </a>
+    </div>
+
+    <!-- قسم الهيدرات -->
+    <div class="card">
+        <h2>Security Headers Analysis</h2>
+        <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+            <div style="background: #080d18; padding: 15px; border-radius: 8px; border: 1px solid #243b5c; flex: 1; min-width: 150px;">
+                <div style="color: #9aabc5; font-size: 14px; margin-bottom: 5px;">Website</div>
+                <div style="font-size: 16px; font-weight: bold; color: #00e5ff; word-break: break-all;">{{ results.scan.url }}</div>
+            </div>
+            <div style="background: #080d18; padding: 15px; border-radius: 8px; border: 1px solid #243b5c; flex: 1; min-width: 150px;">
+                <div style="color: #9aabc5; font-size: 14px; margin-bottom: 5px;">HTTP Status</div>
+                <div style="font-size: 22px; font-weight: bold; {% if results.scan.status_code == 200 %}color: #4caf50;{% else %}color: #ffb300;{% endif %}">
+                    {{ results.scan.status_code }}
+                </div>
+            </div>
+            <div style="background: #080d18; padding: 15px; border-radius: 8px; border: 1px solid #243b5c; flex: 1; min-width: 150px;">
+                <div style="color: #9aabc5; font-size: 14px; margin-bottom: 5px;">Security Score</div>
+                <div style="font-size: 22px; font-weight: bold; {% if results.scan.score >= 80 %}color: #4caf50;{% elif results.scan.score >= 50 %}color: #ffb300;{% else %}color: #ff5252;{% endif %}">
+                    {{ results.scan.score }}%
+                </div>
+            </div>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+            <thead>
+                <tr style="border-bottom: 2px solid #243b5c; text-align: left; color: #9aabc5;">
+                    <th style="padding: 12px 10px;">Header</th>
+                    <th style="padding: 12px 10px;">Description</th>
+                    <th style="padding: 12px 10px;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for header in results.scan.headers %}
+                <tr style="border-bottom: 1px solid #1a2a45;">
+                    <td style="padding: 12px 10px; color: #00e5ff; font-weight: bold;">{{ header.header }}</td>
+                    <td style="padding: 12px 10px; color: #c4d1e6;">{{ header.description }}</td>
+                    <td style="padding: 12px 10px;">
+                        {% if header.status == 'FOUND' %}
+                            <span style="background: #1b3322; color: #4caf50; border: 1px solid #4caf50; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">FOUND</span>
+                        {% else %}
+                            <span style="background: #331b1b; color: #ff5252; border: 1px solid #ff5252; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">MISSING</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- كارت التقنيات -->
+    <div class="card">
+        <h2>Detected Technologies</h2>
+        {% if results.scan.technologies %}
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                {% for tech in results.scan.technologies %}
+                <div style="background: #080d18; padding: 15px; border-radius: 8px; border: 1px solid #243b5c; flex: 1; min-width: 200px;">
+                    <div style="color: #9aabc5; font-size: 14px; margin-bottom: 5px;">{{ tech.name }}</div>
+                    <div style="font-size: 18px; font-weight: bold; color: #00e5ff; word-break: break-word;">{{ tech.value }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="background: #1b2a33; border: 1px solid #00e5ff; padding: 15px; border-radius: 8px; color: #00e5ff; text-align: center;">
+                No specific technologies detected.
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- كارت الكوكيز -->
+    <div class="card">
+        <h2>Cookie Security</h2>
+        {% if results.scan.cookie_security %}
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #243b5c; text-align: left; color: #9aabc5;">
+                        <th style="padding: 12px 10px;">Cookie Name</th>
+                        <th style="padding: 12px 10px;">Secure</th>
+                        <th style="padding: 12px 10px;">HttpOnly</th>
+                        <th style="padding: 12px 10px;">SameSite</th>
+                        <th style="padding: 12px 10px;">Issues</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cookie in results.scan.cookie_security %}
+                    <tr style="border-bottom: 1px solid #1a2a45;">
+                        <td style="padding: 12px 10px; color: #00e5ff; font-weight: bold;">{{ cookie.name }}</td>
+                        <td style="padding: 12px 10px;">
+                            {% if cookie.secure %}<span style="color: #4caf50; font-weight: bold;">Yes</span>{% else %}<span style="color: #ff5252; font-weight: bold;">No</span>{% endif %}
+                        </td>
+                        <td style="padding: 12px 10px;">
+                            {% if cookie.httponly %}<span style="color: #4caf50; font-weight: bold;">Yes</span>{% else %}<span style="color: #ff5252; font-weight: bold;">No</span>{% endif %}
+                        </td>
+                        <td style="padding: 12px 10px; color: {% if cookie.samesite == 'Not Set' or cookie.samesite|lower == 'none' %}#ffb300{% else %}#4caf50{% endif %}; font-weight: bold;">
+                            {{ cookie.samesite }}
+                        </td>
+                        <td style="padding: 12px 10px;">
+                            {% if cookie.issues %}
+                                <ul style="margin: 0; padding-left: 15px; color: #ff7777; font-size: 13px;">
+                                    {% for issue in cookie.issues %}
+                                        <li>{{ issue }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <span style="color: #4caf50;">All good</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div style="background: #1b2a33; border: 1px solid #00e5ff; padding: 15px; border-radius: 8px; color: #00e5ff; text-align: center;">
+                No cookies found on the main page.
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- كارت المخاطر -->
+    <div class="card">
+        <h2>Risk Assessment</h2>
+        <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+            <div style="background: #080d18; padding: 15px; border-radius: 8px; border: 1px solid #243b5c; flex: 1; min-width: 150px;">
+                <div style="color: #9aabc5; font-size: 14px; margin-bottom: 5px;">Risk Level</div>
+                <div style="font-size: 22px; font-weight: bold; {% if results.risk.risk_level == 'HIGH' %}color: #ff5252;{% elif results.risk.risk_level == 'MEDIUM' %}color: #ffb300;{% elif results.risk.risk_level == 'LOW' %}color: #4caf50;{% else %}color: #00e5ff;{% endif %}">
+                    {{ results.risk.risk_level }}
+                </div>
+            </div>
+            <div style="background: #080d18; padding: 15px; border-radius: 8px; border: 1px solid #243b5c; flex: 1; min-width: 150px;">
+                <div style="color: #9aabc5; font-size: 14px; margin-bottom: 5px;">Risk Score</div>
+                <div style="font-size: 22px; font-weight: bold; color: #e8f0ff;">{{ results.risk.risk_score }} <span style="font-size: 14px; color: #9aabc5;">/ 100</span></div>
+            </div>
+            <div style="background: #080d18; padding: 15px; border-radius: 8px; border: 1px solid #243b5c; flex: 1; min-width: 150px;">
+                <div style="color: #9aabc5; font-size: 14px; margin-bottom: 5px;">Findings</div>
+                <div style="font-size: 22px; font-weight: bold; color: #e8f0ff;">{{ results.risk.findings_count }}</div>
+            </div>
+        </div>
+        {% if results.risk.findings %}
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+            <thead>
+                <tr style="border-bottom: 2px solid #243b5c; text-align: left; color: #9aabc5;">
+                    <th style="padding: 12px 10px;">Issue</th>
+                    <th style="padding: 12px 10px;">Description</th>
+                    <th style="padding: 12px 10px;">Severity</th>
+                    <th style="padding: 12px 10px;">Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for finding in results.risk.findings %}
+                <tr style="border-bottom: 1px solid #1a2a45;">
+                    <td style="padding: 12px 10px; color: #00e5ff; font-weight: bold;">{{ finding.name }}</td>
+                    <td style="padding: 12px 10px; color: #c4d1e6;">{{ finding.description }}</td>
+                    <td style="padding: 12px 10px;"><span style="background: #ffb300; color: #000; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">{{ finding.severity }}</span></td>
+                    <td style="padding: 12px 10px; color: #ff7777; font-weight: bold;">+{{ finding.risk_score }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <div style="background: #1b3322; border: 1px solid #4caf50; padding: 15px; border-radius: 8px; color: #a5d6a7; text-align: center;">
+                Excellent! No major security risks found.
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- قسم SSL -->
+    <div class="card">
+        <h2>SSL / TLS Analysis</h2>
+        {% if results.ssl.error %}
+            <div style="background: #331b1b; border: 1px solid #ff5252; padding: 15px; border-radius: 8px; color: #ff7777;">
+                Failed to analyze SSL/TLS: {{ results.ssl.error }}
+            </div>
+        {% else %}
+            <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+                <div style="background: #080d18; padding: 15px; border-radius: 8px; border: 1px solid #243b5c; flex: 1; min-width: 150px;">
+                    <div style="color: #9aabc5; font-size: 14px; margin-bottom: 5px;">Status</div>
+                    <div style="font-size: 22px; font-weight: bold; {% if results.ssl.valid %}color: #4caf50;{% else %}color: #ff5252;{% endif %}">
+                        {% if results.ssl.valid %}VALID{% else %}INVALID / EXPIRED{% endif %}
+                    </div>
+                </div>
+                <div style="background: #080d18; padding: 15px; border-radius: 8px; border: 1px solid #243b5c; flex: 1; min-width: 150px;">
+                    <div style="color: #9aabc5; font-size: 14px; margin-bottom: 5px;">TLS Version</div>
+                    <div style="font-size: 22px; font-weight: bold; color: #e8f0ff;">{{ results.ssl.tls_version }}</div>
+                </div>
+                <div style="background: #080d18; padding: 15px; border-radius: 8px; border: 1px solid #243b5c; flex: 1; min-width: 150px;">
+                    <div style="color: #9aabc5; font-size: 14px; margin-bottom: 5px;">Issuer</div>
+                    <div style="font-size: 18px; font-weight: bold; color: #00e5ff; word-break: break-word;">{{ results.ssl.issuer }}</div>
+                </div>
+                <div style="background: #080d18; padding: 15px; border-radius: 8px; border: 1px solid #243b5c; flex: 1; min-width: 150px;">
+                    <div style="color: #9aabc5; font-size: 14px; margin-bottom: 5px;">Days Remaining</div>
+                    <div style="font-size: 22px; font-weight: bold; {% if results.ssl.days_remaining < 30 %}color: #ffb300;{% else %}color: #4caf50;{% endif %}">
+                        {{ results.ssl.days_remaining }} Days
+                    </div>
+                </div>
+            </div>
+            <div style="font-size: 13px; color: #9aabc5; margin-top: 10px; border-top: 1px solid #1a2a45; padding-top: 10px;">
+                <strong>Hostname:</strong> {{ results.ssl.hostname }} | <strong>Expires On:</strong> {{ results.ssl.expires[:10] }}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- قسم DNS -->
+    <div class="card">
+        <h2>DNS Intelligence</h2>
+        {% if results.dns.error %}
+            <div style="background: #331b1b; border: 1px solid #ff5252; padding: 15px; border-radius: 8px; color: #ff7777;">
+                Failed to analyze DNS: {{ results.dns.error }}
+            </div>
+        {% else %}
+            <p style="color: #9aabc5; margin-bottom: 20px;">Domain: <strong style="color: #00e5ff;">{{ results.dns.domain }}</strong></p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                {% for record_type, records in results.dns.records.items() %}
+                    <div style="background: #080d18; padding: 15px; border-radius: 8px; border: 1px solid #243b5c;">
+                        <div style="color: #9aabc5; font-size: 14px; margin-bottom: 10px; border-bottom: 1px solid #1a2a45; padding-bottom: 5px;">
+                            <strong>{{ record_type }} Records</strong>
+                        </div>
+                        {% if records %}
+                            <ul style="margin: 0; padding-left: 20px; color: #e8f0ff; font-size: 14px;">
+                                {% for record in records %}
+                                    <li style="margin-bottom: 5px; word-break: break-all;">{{ record }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <div style="color: #ffb300; font-size: 14px; font-style: italic;">No records found</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- قسم WHOIS الجديد -->
+    <div class="card">
+        <h2>WHOIS Lookup</h2>
+        {% if results.whois.error %}
+            <div style="background: #331b1b; border: 1px solid #ff5252; padding: 15px; border-radius: 8px; color: #ff7777;">
+                Failed to fetch WHOIS data: {{ results.whois.error }}
+            </div>
+        {% else %}
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                <div style="background: #080d18; padding: 15px; border-radius: 8px; border: 1px solid #243b5c;">
+                    <div style="color: #9aabc5; font-size: 14px; margin-bottom: 5px;">Registrar</div>
+                    <div style="font-size: 16px; font-weight: bold; color: #00e5ff; word-break: break-word;">{{ results.whois.registrar }}</div>
+                </div>
+                <div style="background: #080d18; padding: 15px; border-radius: 8px; border: 1px solid #243b5c;">
+                    <div style="color: #9aabc5; font-size: 14px; margin-bottom: 5px;">Creation Date</div>
+                    <div style="font-size: 16px; font-weight: bold; color: #e8f0ff;">{{ results.whois.creation_date }}</div>
+                </div>
+                <div style="background: #080d18; padding: 15px; border-radius: 8px; border: 1px solid #243b5c;">
+                    <div style="color: #9aabc5; font-size: 14px; margin-bottom: 5px;">Expiration Date</div>
+                    <div style="font-size: 16px; font-weight: bold; color: {% if results.whois.days_until_expiry != 'Unknown' and results.whois.days_until_expiry < 30 %}#ffb300{% else %}#4caf50{% endif %};">
+                        {{ results.whois.expiration_date }} 
+                        {% if results.whois.days_until_expiry != 'Unknown' %}
+                            <br><span style="font-size: 13px; color: #9aabc5;">({{ results.whois.days_until_expiry }} days left)</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div style="background: #080d18; padding: 15px; border-radius: 8px; border: 1px solid #243b5c;">
+                <div style="color: #9aabc5; font-size: 14px; margin-bottom: 10px; border-bottom: 1px solid #1a2a45; padding-bottom: 5px;">
+                    <strong>Name Servers</strong>
+                </div>
+                {% if results.whois.name_servers %}
+                    <ul style="margin: 0; padding-left: 20px; color: #e8f0ff; font-size: 14px;">
+                        {% for ns in results.whois.name_servers %}
+                            <li style="margin-bottom: 5px;">{{ ns }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div style="color: #ffb300; font-size: 14px; font-style: italic;">No name servers found.</div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- قسم النطاقات الفرعية الجديد -->
+    <div class="card">
+        <h2>Subdomain Enumeration</h2>
+        {% if results.subdomains.error %}
+            <div style="background: #331b1b; border: 1px solid #ff5252; padding: 15px; border-radius: 8px; color: #ff7777;">
+                Failed to fetch subdomains: {{ results.subdomains.error }}
+            </div>
+        {% else %}
+            <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+                <div style="background: #080d18; padding: 15px; border-radius: 8px; border: 1px solid #243b5c; flex: 1; min-width: 150px;">
+                    <div style="color: #9aabc5; font-size: 14px; margin-bottom: 5px;">Base Domain</div>
+                    <div style="font-size: 18px; font-weight: bold; color: #00e5ff; word-break: break-all;">{{ results.subdomains.domain }}</div>
+                </div>
+                <div style="background: #080d18; padding: 15px; border-radius: 8px; border: 1px solid #243b5c; flex: 1; min-width: 150px;">
+                    <div style="color: #9aabc5; font-size: 14px; margin-bottom: 5px;">Subdomains Found</div>
+                    <div style="font-size: 22px; font-weight: bold; {% if results.subdomains.total_found > 0 %}color: #ffb300;{% else %}color: #4caf50;{% endif %}">
+                        {{ results.subdomains.total_found }}
+                    </div>
+                </div>
+            </div>
+
+            {% if results.subdomains.subdomains %}
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px;">
+                    {% for sub in results.subdomains.subdomains %}
+                        <div style="background: #080d18; padding: 10px 15px; border-radius: 8px; border: 1px solid #243b5c; color: #e8f0ff; font-size: 14px; word-break: break-all;">
+                            🌐 {{ sub }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="background: #1b3322; border: 1px solid #4caf50; padding: 15px; border-radius: 8px; color: #a5d6a7; text-align: center;">
+                    No subdomains found (or they are hidden).
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+
+
+
+
+    <!-- قسم فحص المنافذ -->
+    <div class="card">
+        <h2>Port Scanner Results</h2>
+        {% if results.ports.error %}
+            <div style="background: #331b1b; border: 1px solid #ff5252; padding: 15px; border-radius: 8px; color: #ff7777;">
+                Failed to scan ports: {{ results.ports.error }}
+            </div>
+        {% else %}
+            <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+                <div style="background: #080d18; padding: 15px; border-radius: 8px; border: 1px solid #243b5c; flex: 1; min-width: 150px;">
+                    <div style="color: #9aabc5; font-size: 14px; margin-bottom: 5px;">IP Address</div>
+                    <div style="font-size: 18px; font-weight: bold; color: #00e5ff; word-break: break-all;">{{ results.ports.ip_address }}</div>
+                </div>
+                <div style="background: #080d18; padding: 15px; border-radius: 8px; border: 1px solid #243b5c; flex: 1; min-width: 150px;">
+                    <div style="color: #9aabc5; font-size: 14px; margin-bottom: 5px;">Open Ports</div>
+                    <div style="font-size: 22px; font-weight: bold; {% if results.ports.total_open > 0 %}color: #ffb300;{% else %}color: #4caf50;{% endif %}">
+                        {{ results.ports.total_open }}
+                    </div>
+                </div>
+            </div>
+
+            {% if results.ports.open_ports %}
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #243b5c; text-align: left; color: #9aabc5;">
+                        <th style="padding: 12px 10px;">Port</th>
+                        <th style="padding: 12px 10px;">Service</th>
+                        <th style="padding: 12px 10px;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for port_info in results.ports.open_ports %}
+                    <tr style="border-bottom: 1px solid #1a2a45;">
+                        <td style="padding: 12px 10px; color: #00e5ff; font-weight: bold;">{{ port_info.port }}</td>
+                        <td style="padding: 12px 10px; color: #e8f0ff;">{{ port_info.service }}</td>
+                        <td style="padding: 12px 10px;">
+                            <span style="background: #1b3322; color: #4caf50; border: 1px solid #4caf50; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">OPEN</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+                <div style="background: #1b3322; border: 1px solid #4caf50; padding: 15px; border-radius: 8px; color: #a5d6a7; text-align: center;">
+                    No common open ports detected.
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    {% endif %}
+
+</div>
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security History - CYBER INCOME LAB</title>
+
+    <style>
+        body {
+            background: #080d18;
+            color: #e8f0ff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        h1 {
+            color: #00e5ff;
+            text-align: center;
+        }
+
+        h2 {
+            color: #00e5ff;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: #111b2e;
+            border: 1px solid #243b5c;
+            border-radius: 12px;
+            padding: 22px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid #1a2a45;
+        }
+
+        th {
+            color: #9aabc5;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background: #1a2a45;
+            transition: background 0.2s ease;
+        }
+
+        td {
+            color: #e8f0ff;
+            font-size: 15px;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: #9aabc5;
+            font-size: 16px;
+        }
+
+        .btn-view {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #00bcd4;
+            color: #000;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .btn-view:hover {
+            background: #00e5ff;
+        }
+
+        /* تصميم شريط التنقل */
+        .navbar {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            background: #111b2e;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #243b5c;
+            margin-bottom: 30px;
+        }
+
+        .navbar a {
+            color: #9aabc5;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            padding: 8px 16px;
+            border-radius: 7px;
+            transition: all 0.3s ease;
+        }
+
+        .navbar a:hover, .navbar a.active {
+            color: #00e5ff;
+            background: #080d18;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <!-- شريط التنقل الجديد -->
+    <div class="navbar">
+        <a href="/">Dashboard</a>
+        <a href="/history" class="active">Scan History</a>
+    </div>
+
+    <h1>CYBER INCOME LAB</h1>
+    <h2>Security Scan History</h2>
+
+    {% if scans %}
+
+    <div class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Website</th>
+                    <th>Date</th>
+                    <th>Security Score</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for scan in scans %}
+                <tr>
+                    <td>#{{ scan.id }}</td>
+                    <td style="color: #00e5ff; font-weight: bold;">{{ scan.website }}</td>
+                    <td>{{ scan.scan_date[:10] }} <span style="color: #9aabc5; font-size: 13px;">{{ scan.scan_date[11:16] }}</span></td>
+                    <td>
+                        {% if scan.security_score >= 80 %}
+                            <span style="color: #4caf50; font-weight: bold;">{{ scan.security_score }}%</span>
+                        {% elif scan.security_score >= 50 %}
+                            <span style="color: #ffb300; font-weight: bold;">{{ scan.security_score }}%</span>
+                        {% else %}
+                            <span style="color: #ff5252; font-weight: bold;">{{ scan.security_score }}%</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="/scan/{{ scan.id }}" class="btn-view">View Details</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+
+    <div class="card">
+        <div class="empty">
+            No previous scans found. Go scan a website first!
+        </div>
+    </div>
+
+    {% endif %}
+
+</div>
+</body>
+</html>
