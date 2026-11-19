@@ -1,4 +1,5 @@
 import os
+import tempfile  # مكتبة جديدة للحفظ في المجلد المؤقت
 from datetime import datetime
 from xml.sax.saxutils import escape
 
@@ -16,10 +17,9 @@ from reportlab.platypus import (
 
 
 def generate_report(results):
-    os.makedirs("reports", exist_ok=True)
-
+    # حل مشكلة الصلاحيات: نحفظ الملف في المجلد المؤقت للسيرفر
     filename = "security_report_" + datetime.now().strftime("%Y%m%d_%H%M%S") + ".pdf"
-    filepath = os.path.join("reports", filename)
+    filepath = os.path.join(tempfile.gettempdir(), filename)
 
     document = SimpleDocTemplate(
         filepath,
